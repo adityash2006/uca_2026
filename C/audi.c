@@ -9,8 +9,6 @@
 int main(int argc, char *argv[])
 {
     int fd;
-    ssize_t numRead;
-    
 
     if (argc < 2)
     {
@@ -29,11 +27,10 @@ int main(int argc, char *argv[])
         }
 
         fd = open("auditlog.txt",
-                  O_CREAT | O_WRONLY | O_APPEND |
+                  O_CREAT | O_WRONLY | O_APPEND ,
                 S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-        if (fd == -1)
-        {
+        if (fd == -1){
             perror("open");
             exit(1);
         }
@@ -61,13 +58,17 @@ int main(int argc, char *argv[])
 
         char ch;
         int line=1;
-        printf("%d:",line);
-
+        int newline=1;
+    
         while(read(fd,&ch,1)>0){
+            if(newline){
+                printf("%d: ", line);
+                newline=0;
+            }
             printf("%c",ch);
             if(ch=='\n'){    
-                 line++;
-                printf("%d: ", line);
+                line++;
+                newline=1;
             }
         }
         printf("\n");
