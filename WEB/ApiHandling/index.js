@@ -23,5 +23,3 @@ web1.onmessage= function(event){
    console.log("out of the worker");
 
 }
-
-
