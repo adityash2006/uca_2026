@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 
 void heapify (void* arr, int position, int size,int shiftSize,int (*cmp)(void *, void *)){
@@ -41,7 +42,7 @@ void heapify (void* arr, int position, int size,int shiftSize,int (*cmp)(void *,
 
 void heapSort(void* arr,int size,int shiftSize,int (*cmp)(void *, void *)){
 
-    for(int i=size/2+1;i>=0;i--){
+    for(int i=size/2-1;i>=0;i--){
         heapify(arr,i,size,shiftSize,cmp);
     }
 
