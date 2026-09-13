@@ -323,7 +323,7 @@ JOIN Student s1
 JOIN Student s2
     ON s2.student_id = e2.student_id;
     
-5.
+6.
 SELECT B.title
 FROM Book B
 WHERE B.author IN (
@@ -344,3 +344,133 @@ WHERE B.author IN (
     GROUP BY author
     HAVING COUNT(DISTINCT dept_id) > 1
 );
+
+7.
+
+SELECT I.name, COUNT(C.course_id) AS course_count
+FROM Instructor I
+JOIN Course C
+    ON I.instructor_id = C.instructor_id
+GROUP BY I.instructor_id, I.name
+HAVING COUNT(C.course_id) > (
+    SELECT AVG(course_count)
+    FROM (
+        SELECT COUNT(course_id) AS course_count
+        FROM Course
+        GROUP BY instructor_id
+    ) AS x
+);
+8.
+SELECT course_name
+FROM Course
+WHERE course_id IN (
+    SELECT course_id
+    FROM Enrollment
+    GROUP BY course_id
+    HAVING AVG(
+        CASE
+            WHEN grade = 'A' THEN 4
+            WHEN grade = 'B' THEN 3
+            WHEN grade = 'C' THEN 2
+        END
+    ) > (
+        SELECT AVG(
+            CASE
+                WHEN grade = 'A' THEN 4
+                WHEN grade = 'B' THEN 3
+                WHEN grade = 'C' THEN 2
+            END
+        )
+        FROM Enrollment
+    )
+);
+
+
+9.
+SELECT D.dept_name,
+       SUM(F.amount) AS total_collected,
+       D.budget,
+       (SUM(F.amount) * 100) / D.budget AS percentage
+FROM Fee_Payment F
+LEFT JOIN Student S
+    ON S.student_id = F.student_id
+JOIN Department D
+    ON D.dept_id = S.dept_id
+GROUP BY D.dept_id, D.dept_name, D.budget
+HAVING SUM(F.amount) > 0.20 * D.budget;
+
+10 .
+SELECT
+    B.student_id,
+    COUNT(DISTINCT B.book_id) AS total_books_issued
+FROM Book_Issue B
+LEFT JOIN Fee_Payment F
+    ON B.student_id = F.student_id
+GROUP BY B.student_id
+HAVING COUNT(
+    CASE
+        WHEN F.semester = 'Spring2024' THEN 1
+    END
+) = 0;
+
+11 .
+SELECT distinct Student.name
+FROM Student
+RIGHT JOIN Course
+    ON Course.dept_id = Student.dept_id
+LEFT JOIN Enrollment E
+    ON E.student_id = Student.student_id
+    AND E.course_id = Course.course_id
+WHERE E.enroll_id IS NULL;
+
+SELECT s.name
+FROM Student s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Course c
+    WHERE c.dept_id = s.dept_id
+      AND NOT EXISTS (
+          SELECT 1
+          FROM Enrollment e
+          WHERE e.student_id = s.student_id
+            AND e.course_id = c.course_id
+      )
+);
+12
+SELECT name, dept_id
+FROM Instructor
+WHERE instructor_id NOT IN (
+    SELECT I.instructor_id
+    FROM Course C
+    JOIN Instructor I
+        ON C.instructor_id = I.instructor_id
+    JOIN Enrollment E
+        ON E.course_id = C.course_id
+    WHERE E.grade NOT IN ('A', 'B')
+);
+
+13.
+SELECT DISTINCT
+    S.name,
+    B.title,
+    CS1.room_no
+FROM Student S
+JOIN Enrollment E
+    ON E.student_id = S.student_id
+JOIN Course_Schedule CS1
+    ON CS1.course_id = E.course_id
+JOIN Book_Issue BI
+    ON BI.student_id = S.student_id
+JOIN Book B
+    ON B.book_id = BI.book_id
+WHERE BI.return_date IS NULL
+  AND EXISTS (
+      SELECT 1
+      FROM Course_Schedule CS2
+      WHERE CS2.room_no = CS1.room_no
+        AND CS2.course_id <> CS1.course_id
+  );
+  
+  select distinct E.student_id , B.book_id , c1.room_no from Course_Schedule c1 join Course_Schedule c2 on c1.room_no = c2.room_no and c1.schedule_id < c2.schedule_id left join Enrollment E on E.course_id = c1.course_id or E.course_id= c2.course_id join Book_Issue B on B.student_id=E.student_id where B.return_date is null;
+
+
